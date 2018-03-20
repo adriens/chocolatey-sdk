@@ -11,3 +11,8 @@ Actually, with this SDK you can get :
 - Last Update Date
 - Current Downloads
 - Total Downloads
+
+# Why this lib ?
+
+Stay tuned and you will have news on the why soon !...but it should be fun
+at the end.
