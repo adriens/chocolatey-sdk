@@ -11,6 +11,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -24,6 +25,25 @@ import org.slf4j.LoggerFactory;
  * @author salad74
  */
 public class PackageWrapper {
+
+    /**
+     * @return the nuspecPackageMetaData
+     */
+    public NuspecPackageMetaData getNuspecPackageMetaData() {
+        return nuspecPackageMetaData;
+    }
+
+    /**
+     * @param nuspecPackageMetaData the nuspecPackageMetaData to set
+     */
+    public void setNuspecPackageMetaData(NuspecPackageMetaData nuspecPackageMetaData) {
+        this.nuspecPackageMetaData = nuspecPackageMetaData;
+    }
+    public void setNuspecPackageMetaData() throws Exception{
+        NuspecParser parser = new NuspecParser(getPackageName(), getPackageVersion());
+        this.nuspecPackageMetaData = parser.getNuspecPackageMetaData();
+    }
+    
 
     /**
      * @return the downloadURL
@@ -117,21 +137,20 @@ public class PackageWrapper {
     private int nbAllVersionsDownloads;
     private Date lastUpdate;
     private URL downloadURL;
+    private NuspecPackageMetaData nuspecPackageMetaData;
     
-    public PackageWrapper(){
-        
-    }
     
-    public PackageWrapper(String aPackageName) throws IOException{
+    public static final String URL_PACKAGES_ROOT = "https://packages.chocolatey.org/";
+    
+    public PackageWrapper(String aPackageName) throws Exception{
         this.packageName = aPackageName;
-        this.packageName = this.packageName.toLowerCase();
         this.packageName = this.packageName.trim();
         try{
             logger.info("Trying to get datas from the web for package <" + this.packageName+ ">...");
             fillUp();
             logger.info("Successfuly got datas from the web for package <" + getPackageName() + ">.");
         }
-        catch(IOException ex){
+        catch(Exception ex){
             logger.error("Was not able to fetch datas for package <" + this.packageName + "> : " + ex.getMessage() );
             throw ex;
         }
@@ -139,6 +158,51 @@ public class PackageWrapper {
     
     
     
+    public PackageWrapper(String aPackageName, boolean fetchNuspec) throws Exception{
+        this.packageName = aPackageName;
+        this.packageName = this.packageName.trim();
+        try{
+            logger.info("Trying to get datas from the web for package <" + this.packageName+ ">...");
+            fillUp();
+            logger.info("Successfuly got datas from the web for package <" + getPackageName() + ">.");
+            
+            if(fetchNuspec){
+                logger.info("Now getting datas from online nuspec file...");
+                setNuspecPackageMetaData();
+                logger.info("Sucessfully got nuspec datas.");
+            }
+            else{
+                logger.info("Will NOT fetch metadatas from nuspec.");
+            }
+            
+        }
+        catch(Exception ex){
+            logger.error("Was not able to fetch datas for package <" + this.packageName + "> : " + ex.getMessage() );
+            throw ex;
+        }
+    }
+    
+    public PackageWrapper(){
+        
+    }
+    
+    
+    public final static URL composeNuPkgDownloadURL(String aPackage, String aVersion)
+            throws MalformedURLException {
+        URL out;
+        try{
+            if(aPackage == null | aVersion == null){
+            return null;
+        } else{
+            return new URL(PackageWrapper.URL_PACKAGES_ROOT + aPackage + "." + aVersion + ".nupkg");//https://packages.chocolatey.org/schemacrawler.14.20.03.nupkg
+        }
+        }
+        catch(MalformedURLException ex){
+            logger.error("Was not able to build a proper URL for the nuspec file : " + ex.getMessage());
+            throw ex;
+        }
+        
+    }
     private static WebClient buildWebClient() {
         // Disable verbose logs
         java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(java.util.logging.Level.OFF);
@@ -203,6 +267,7 @@ public class PackageWrapper {
         logger.debug("Found download URL : <" + downloadURLElement.getHrefAttribute() + ">");
         setDownloadURL(new URL(downloadURLElement.getHrefAttribute()));
         logger.info("Download URL : <" + getDownloadURL() + ">");
+ 
         
         /*
         // dependances
@@ -232,13 +297,15 @@ public class PackageWrapper {
     }
     public static void main(String[] args) {
         try {
-            PackageWrapper wrap = new PackageWrapper("Firefox");
+            PackageWrapper wrap = new PackageWrapper("Graphviz", false);
             logger.info("Found package : " + wrap);
             //wrap.fetchCrawlPackage("schemacrawler");
             //wrap.fetchCrawlPackage("liquibase");
             //wrap.fetchCrawlPackage("Firefox");
+            //wrap.fetchCrawlPackage("Graphviz");
+            System.exit(0);
         }
-        catch(IOException ex){
+        catch(Exception ex){
             ex.printStackTrace();
             System.exit(1);
         }
