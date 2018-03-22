@@ -104,6 +104,8 @@ public class NuspecParser {
             
             FileSystemManager fsManager = VFS.getManager();
             URL nuPkgUrl = PackageWrapper.composeNuPkgDownloadURL(getPackageName(), getVersion());
+            
+            
             FileObject nuPkgFile = fsManager.resolveFile("zip:" + nuPkgUrl.toString());
             // now get the nuspec file
             // List the children of the Jar file

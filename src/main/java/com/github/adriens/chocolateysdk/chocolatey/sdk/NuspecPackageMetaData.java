@@ -47,7 +47,7 @@ public class NuspecPackageMetaData {
     private URL bugTrackerUrl;
     
     private List<NuspecDependency> dependencies;
-    
+        
     /**
      * @return the id
      */

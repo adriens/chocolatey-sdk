@@ -138,9 +138,25 @@ public class PackageWrapper {
     private Date lastUpdate;
     private URL downloadURL;
     private NuspecPackageMetaData nuspecPackageMetaData;
+    private URL nupkgDownloadURL;
     
     
     public static final String URL_PACKAGES_ROOT = "https://packages.chocolatey.org/";
+    
+    /**
+     * @return the nupkgDownloadURL
+     */
+    public URL getNupkgDownloadURL() {
+        return nupkgDownloadURL;
+    }
+
+    /**
+     * @param nupkgDownloadURL the nupkgDownloadURL to set
+     */
+    public void setNupkgDownloadURL(URL nupkgDownloadURL) {
+        this.nupkgDownloadURL = nupkgDownloadURL;
+    }
+    
     
     public PackageWrapper(String aPackageName) throws Exception{
         this.packageName = aPackageName;
@@ -224,6 +240,11 @@ public class PackageWrapper {
         this.setPackageVersion(versionElement.getTextContent());
         logger.info("Found version for package <" + this.getPackageName() + "> : <" + this.getPackageVersion() + ">" );
         
+    
+        // set nupkgDownloadURL
+        URL nuPkgUrl = PackageWrapper.composeNuPkgDownloadURL(getPackageName(), getPackageVersion());
+        setNupkgDownloadURL(nuPkgUrl);
+        logger.info("Setup nupkg download url : <" + getNupkgDownloadURL() + ">");
         
         // nb downloads of current version
         HtmlElement downloadsElement = htmlPage.getFirstByXPath("/html/body/div[1]/div/div[1]/div/div[2]/p[1]");
@@ -297,7 +318,7 @@ public class PackageWrapper {
     }
     public static void main(String[] args) {
         try {
-            PackageWrapper wrap = new PackageWrapper("Graphviz", false);
+            PackageWrapper wrap = new PackageWrapper("schemacrawler", true);
             logger.info("Found package : " + wrap);
             //wrap.fetchCrawlPackage("schemacrawler");
             //wrap.fetchCrawlPackage("liquibase");
