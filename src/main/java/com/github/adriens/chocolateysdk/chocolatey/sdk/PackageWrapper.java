@@ -7,9 +7,11 @@ package com.github.adriens.chocolateysdk.chocolatey.sdk;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import java.io.IOException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -22,6 +24,20 @@ import org.slf4j.LoggerFactory;
  * @author salad74
  */
 public class PackageWrapper {
+
+    /**
+     * @return the downloadURL
+     */
+    public URL getDownloadURL() {
+        return downloadURL;
+    }
+
+    /**
+     * @param downloadURL the downloadURL to set
+     */
+    public void setDownloadURL(URL downloadURL) {
+        this.downloadURL = downloadURL;
+    }
 
     /**
      * @return the packageName
@@ -100,6 +116,7 @@ public class PackageWrapper {
     private int nbCurrentVersionDownloads;
     private int nbAllVersionsDownloads;
     private Date lastUpdate;
+    private URL downloadURL;
     
     public PackageWrapper(){
         
@@ -177,6 +194,16 @@ public class PackageWrapper {
             logger.error("Was not able to parse input date <" + lastUpdateElement.getTextContent() +"> : " + ex.getMessage());
             logger.error("Last Update Date set to null");
         }
+        
+        // download URL
+        // here we cannot use xpath as the link position is changing
+        HtmlAnchor downloadURLElement = htmlPage.getAnchorByText("Download");
+        
+        //String rawDownloadURL = downloadURLElement.get ;
+        logger.debug("Found download URL : <" + downloadURLElement.getHrefAttribute() + ">");
+        setDownloadURL(new URL(downloadURLElement.getHrefAttribute()));
+        logger.info("Download URL : <" + getDownloadURL() + ">");
+        
         /*
         // dependances
         DomElement domDeps;
@@ -205,7 +232,7 @@ public class PackageWrapper {
     }
     public static void main(String[] args) {
         try {
-            PackageWrapper wrap = new PackageWrapper("chocolatey");
+            PackageWrapper wrap = new PackageWrapper("Firefox");
             logger.info("Found package : " + wrap);
             //wrap.fetchCrawlPackage("schemacrawler");
             //wrap.fetchCrawlPackage("liquibase");
@@ -213,6 +240,7 @@ public class PackageWrapper {
         }
         catch(IOException ex){
             ex.printStackTrace();
+            System.exit(1);
         }
     }
 }
