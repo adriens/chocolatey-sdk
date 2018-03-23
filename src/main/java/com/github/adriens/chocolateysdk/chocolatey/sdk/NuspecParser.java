@@ -258,7 +258,7 @@ public class NuspecParser {
             this.nuspecPackageMetaData.setDocsUrl(new URL(docsUrl));
             
             // bugTrackerUrl
-            expression = "//package/metadata/docsUrl";
+            expression = "//package/metadata/bugTrackerUrl";
             node = (Node) xPath.compile(expression).evaluate(doc, XPathConstants.NODE);
             String bugTrackerUrl = node.getTextContent();
             logger.debug("Found package bugTrackerUrl from nuspec : <" + node.getTextContent() + ">");
