@@ -142,6 +142,7 @@ public class PackageWrapper {
     
     
     public static final String URL_PACKAGES_ROOT = "https://packages.chocolatey.org/";
+    public static final String URL_PACKAGE_WEBPAGE_ROOT = "https://chocolatey.org/packages/";
     
     /**
      * @return the nupkgDownloadURL
@@ -171,12 +172,47 @@ public class PackageWrapper {
             throw ex;
         }
     }
-    
-    
-    
+    public PackageWrapper(String aPackageName, String aVersion) throws Exception{
+        this.packageName = aPackageName;
+        this.packageName = this.packageName.trim();
+        this.packageVersion = aVersion;
+        try{
+            logger.info("Trying to get datas from the web for package <" + this.packageName+ ">...");
+            fillUp();
+            logger.info("Successfuly got datas from the web for package <" + getPackageName() + ">.");
+        }
+        catch(Exception ex){
+            logger.error("Was not able to fetch datas for package <" + this.packageName + "> : " + ex.getMessage() );
+            throw ex;
+        }
+    }
     public PackageWrapper(String aPackageName, boolean fetchNuspec) throws Exception{
         this.packageName = aPackageName;
         this.packageName = this.packageName.trim();
+        try{
+            logger.info("Trying to get datas from the web for package <" + this.packageName+ ">...");
+            fillUp();
+            logger.info("Successfuly got datas from the web for package <" + getPackageName() + ">.");
+            
+            if(fetchNuspec){
+                logger.info("Now getting datas from online nuspec file...");
+                setNuspecPackageMetaData();
+                logger.info("Sucessfully got nuspec datas.");
+            }
+            else{
+                logger.info("Will NOT fetch metadatas from nuspec.");
+            }
+            
+        }
+        catch(Exception ex){
+            logger.error("Was not able to fetch datas for package <" + this.packageName + "> : " + ex.getMessage() );
+            throw ex;
+        }
+    }
+    public PackageWrapper(String aPackageName, String aVersion, boolean fetchNuspec) throws Exception{
+        this.packageName = aPackageName;
+        this.packageName = this.packageName.trim();
+        this.packageVersion = aVersion;
         try{
             logger.info("Trying to get datas from the web for package <" + this.packageName+ ">...");
             fillUp();
@@ -219,6 +255,29 @@ public class PackageWrapper {
         }
         
     }
+    
+    public final static URL composePackageURL(String aPackage, String aVersion)
+            throws MalformedURLException{
+        if(aVersion == null ){
+            if(aPackage == null){
+                throw new MalformedURLException("Package is null, cannot build package URL");
+            }
+            else{
+                // get the latest version
+                return new URL(PackageWrapper.URL_PACKAGE_WEBPAGE_ROOT + "/" + aPackage);
+            }
+        }
+        // version is not null, we get a fully qualified url to the package version
+        else{
+            if(aPackage == null){
+                // we got a version but no package ;-(
+                throw new MalformedURLException("Package is null, cannot build package URL");
+            }
+            else{
+                return new URL(PackageWrapper.URL_PACKAGE_WEBPAGE_ROOT + "/" + aPackage + "/" + aVersion);
+            }
+        }
+    }
     private static WebClient buildWebClient() {
         // Disable verbose logs
         java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(java.util.logging.Level.OFF);
@@ -232,7 +291,8 @@ public class PackageWrapper {
     
     public void fillUp() throws IOException{
         WebClient webClient = buildWebClient();
-        HtmlPage htmlPage = webClient.getPage("https://chocolatey.org/packages/" + this.getPackageName());
+        //HtmlPage htmlPage = webClient.getPage("https://chocolatey.org/packages/" + this.getPackageName());
+        HtmlPage htmlPage = webClient.getPage(PackageWrapper.composePackageURL(getPackageName(), getPackageVersion()));
         
         // get version
         // /html/body/div[1]/div/div[2]/div[1]/div[2]/h2[1]
@@ -318,7 +378,9 @@ public class PackageWrapper {
     }
     public static void main(String[] args) {
         try {
-            PackageWrapper wrap = new PackageWrapper("schemacrawler", true);
+            //PackageWrapper wrap = new PackageWrapper("schemacrawler", true);
+            PackageWrapper wrap = new PackageWrapper("schemacrawler", "14.20.02",true);
+            
             logger.info("Found package : " + wrap);
             //wrap.fetchCrawlPackage("schemacrawler");
             //wrap.fetchCrawlPackage("liquibase");
