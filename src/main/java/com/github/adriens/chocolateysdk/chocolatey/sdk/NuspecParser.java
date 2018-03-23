@@ -250,6 +250,14 @@ public class NuspecParser {
             logger.debug("Found package projectSourceUrl from nuspec : <" + node.getTextContent() + ">");
             this.nuspecPackageMetaData.setProjectSourceUrl(new URL(projectSourceUrl));
             
+            // packageSourceUrl
+            expression = "//package/metadata/packageSourceUrl";
+            node = (Node) xPath.compile(expression).evaluate(doc, XPathConstants.NODE);
+            String packageSourceUrl = node.getTextContent();
+            logger.debug("Found package packageSourceUrl from nuspec : <" + node.getTextContent() + ">");
+            this.nuspecPackageMetaData.setPackageSourceUrl(new URL(packageSourceUrl));
+            
+            
             // docsUrl
             expression = "//package/metadata/docsUrl";
             node = (Node) xPath.compile(expression).evaluate(doc, XPathConstants.NODE);
