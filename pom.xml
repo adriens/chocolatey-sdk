@@ -14,6 +14,8 @@
         <logback.version>1.2.3</logback.version>
         <junit.version>4.12</junit.version>
         <commons-lang.version>3.7</commons-lang.version>
+        <commons-vfs2.version>2.2</commons-vfs2.version>
+        <commons-httpclient.version>3.1</commons-httpclient.version>
     </properties>
     
     <dependencies>
@@ -44,21 +46,14 @@
             <version>${commons-lang.version}</version>
         </dependency>
         <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.6</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-vfs2 -->
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-vfs2</artifactId>
-            <version>2.2</version>
+            <version>${commons-vfs2.version}</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/commons-httpclient/commons-httpclient -->
         <dependency>
             <groupId>commons-httpclient</groupId>
             <artifactId>commons-httpclient</artifactId>
-            <version>3.1</version>
+            <version>${commons-httpclient.version}</version>
         </dependency>
 
     </dependencies>
